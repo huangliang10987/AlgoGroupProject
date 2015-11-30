@@ -61,25 +61,25 @@ public class DynamicProgram {
 		else {
 			int max = 0;
 			int temp;
-			Vertex temp2 = null;
 			Vertex u = g.getVertex(i);
 			Vertex[] neighbors = g.neighborhoods(u);
 			for (Vertex v : neighbors) {
 				int k = v.number;
-				temp = 1 + longestOrderPath(g, k, n);
+				if (LOP[k] != -1) {
+					temp = 1 + LOP[k];
+				} else {
+					temp = 1 + longestOrderPath(g, k, n);
+				}
 				if (temp > max) {
 					max = temp;
-					temp2 = v;
+					String e = g.getEdge(u, v).toString();
+					if (s[k] == null)
+						s[i] = e;
+					else
+						s[i] = e + " " + s[k];
 				}
 			}
 			LOP[i] = max;
-			if (temp2 != null) {
-				String e = g.getEdge(u, temp2).toString();
-				if (s[temp2.number] == null)
-					s[i] = e;
-				else
-					s[i] = e + " " + s[temp2.number];
-			}
 			return max;
 		}
 	}
