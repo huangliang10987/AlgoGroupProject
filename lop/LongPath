@@ -1,0 +1,106 @@
+package lop;
+
+import java.util.List;
+
+public class LongPath {
+
+	public Integer[] LOP = null;
+	public String[] s = null;
+	public Graph[] gList = null;
+
+	public static void main(String[] args) {
+		String input = "input.txt", output = "output.txt";
+		LongPath lp = new LongPath();
+		List<String> fileText = FileOperator.readFile(input);
+		lp.parseToGraph(fileText);
+		String text = lp.longestOrderPath();
+		System.out.print(text);
+		FileOperator.writeToFile(output, text);
+
+	}
+
+	private String longestOrderPath() {
+		String text = "";
+		int instance = gList.length;
+		int temp = 0;
+		int max = 0;
+		for (int i = 0; i < instance; i++) {
+			Graph g = gList[i];
+			temp = 0;
+			max = 0;
+			int n = g.getOrder();
+			LOP = new Integer[n];
+			s = new String[n];
+			int k = 0;
+			for (int j = 0; j < n; j++) {
+				LOP[j] = 0;
+			}
+			int l = n - 1;
+			for (int j = n - 1; j > -1; j--) {
+				if (j == l) {
+					temp = 0;
+				} else {
+					int maxNeighbor = 0;
+					int tempNeighbor = 0;
+					Vertex u = g.getVertex(j);
+					Vertex[] neighbors = g.neighborhoods(u);
+					for (Vertex v : neighbors) {
+						int nNeighbor = v.number;// the number of vertex
+						tempNeighbor = 1 + LOP[nNeighbor];
+						if (tempNeighbor > maxNeighbor) {
+							maxNeighbor = tempNeighbor;
+							String e = g.getEdge(u, v).toString();
+							if (s[nNeighbor] == null)
+								s[j] = e;
+							else
+								s[j] = e + " " + s[nNeighbor];
+						}
+					}
+					LOP[j] = maxNeighbor;
+					temp = maxNeighbor;
+				}
+				if (temp > max) {
+					max = temp;
+					k = j;
+				}
+			}
+			String sp = System.getProperty("line.separator");
+			text = text + String.valueOf(max) + sp + s[k];
+			if (i < instance - 1) {
+				text = text + sp + sp;
+			}
+		}
+		return text;
+	}
+
+	private void parseToGraph(List<String> lines) {
+		int l = 0;// number of line
+		String line = lines.get(l++);
+		if (line != null) {// parse the first line
+			int instance = Integer.parseInt(line);
+			this.gList = new Graph[instance];
+			for (int k = 0; k < instance; k++) {
+				l++;
+				line = lines.get(l++);
+				String[] s = line.split(" ");
+				int n = Integer.parseInt(s[0]);
+				int m = Integer.parseInt(s[1]);
+				AdjacencyListGraph g = new AdjacencyListGraph();
+				g.graph(n);
+				gList[k] = g;
+				for (int i = 0; i < n; i++) {
+					Vertex v = new Vertex();
+					v.number = i;
+					g.addVertex(v.number, v);
+				}
+				for (int i = 0; i < m; i++) {
+					line = lines.get(l++);
+					s = line.split(" ");
+					Vertex u = g.getVertex(Integer.parseInt(s[0]) - 1);
+					Vertex v = g.getVertex(Integer.parseInt(s[1]) - 1);
+					g.addEdge(new Edge(u, v, 1, String.valueOf(i + 1)));
+				}
+			}
+		}
+	}
+}
